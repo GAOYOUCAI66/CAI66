@@ -1,0 +1,69 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.tree import plot_tree
+from sklearn.tree import  DecisionTreeClassifier
+
+data = pd.read_csv('Employee.csv')
+data = data.iloc[:70]
+
+join_year = []
+age = []
+gend = []
+benc = []
+ed = []
+
+for index, row in data.iterrows():
+    row['JoiningYear'] = row['JoiningYear'] // 3 * 3
+    join_year.append(row['JoiningYear'])
+    #迭代
+    row['Age'] = row['Age'] // 3 * 3
+    age.append(row['Age'])
+
+    if row['Education'] == 'Bachelors':
+        ed.append(0)
+    elif row['Education'] == 'Masters':
+        ed.append(1)
+    elif row['Education'] == 'PHD':
+        ed.append(2)
+
+    if row['Gender'] == 'Male':
+        gend.append(0)
+    else:
+        gend.append(1)
+
+    if row['EverBenched'] == 'No':
+        benc.append(0)
+    else:
+        benc.append(1)
+
+data['JoiningYear'] = join_year
+data['Age'] = age
+data['Education'] = ed
+data['Gender'] = gend
+data['EverBenched'] = benc
+
+Feature_name = data.columns.tolist()
+data = data.values.tolist()
+data = [list(t) for t in data]  #data元素转换为list
+
+X = [row[:-1] for row in data]
+y = [row[-1] for row in data]
+
+X_train, X_test,y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=20230111)
+
+tree_model = DecisionTreeClassifier(criterion='gini')
+
+tree_model.fit(X_train, y_train)
+
+y_pred = tree_model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+
+print("accuracy", accuracy)
+
+plt.figure(figsize=(120, 80))
+plot_tree(tree_model, feature_names=Feature_name, filled=True, rounded=True)
+plt.savefig('my_plot.pdf')  
